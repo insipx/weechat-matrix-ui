@@ -1,12 +1,21 @@
 import_ok = True
 
 from matrix_ui._weechat import (
-    handle_hotlist,
     config_buffer_create_option_cb,
     config_reload_cb,
     config_option_cb,
-    signal_buffer_opened_cb,
+)
+
+from matrix_ui.buffers import (
+    handle_hotlist,
     signal_hotlist_changed_cb,
+    signal_buffer_opened_cb
+)
+
+from matrix_ui.command import (
+    wui_cmd,
+    completion_current_buffer_cb,
+    completion_options_cb,
 )
 
 from matrix_ui.globals import (
@@ -83,7 +92,21 @@ if __name__ == "__main__" and import_ok:
                 SCRIPT_COMMAND,
                 "Hides Matrix Buffers unless there is activity",
                 "", "", "",
-                "cmd", "")
+                "wui_cmd", "")
+
+            """
+            weechat.hook_completion(
+                "wui_current_buffer",
+                "Current buffer name for wui",
+                "completion_current_buffer_cb"
+            )
+
+            weechat.hook_completion(
+                "wui_options",
+                "list of options for wui",
+                "completion_options_cb"
+            )
+            """
 
             weechat.hook_signal("9000|buffer_opened",
                         "signal_buffer_opened_cb", "")

@@ -13,5 +13,5 @@ SCRIPT_AUTHOR = "Andrew Plaza <dev@andrewplaza.dev>"
 SCRIPT_VERSION = "0.1"
 SCRIPT_LICENSE = "GPL3"
 SCRIPT_DESC = "Hide Matrix Buffers on inactvity, and put private messages in merge buffer"
-SCRIPT_COMMAND = SCRIPT_NAME
+SCRIPT_COMMAND = "wui"
 CONFIG_FILE_NAME = "weechat-matrix-ui"
