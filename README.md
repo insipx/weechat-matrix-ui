@@ -11,3 +11,5 @@
   - [ ] optionally group under merged buffer
   - [ ] keybind to show/hide private messages
 
+##### Command in weechat: `wui`
+
