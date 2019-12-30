@@ -1,5 +1,5 @@
 # Matrix UI
-### Extensions to matrix-weechat to make navigating lots of channels easier
+### Extensions to [weechat-matrix](https://github.com/poljar/weechat-matrix) to make navigating lots of channels easier
 
 
 ##### Features
