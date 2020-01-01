@@ -13,3 +13,52 @@
 
 # You should have received a copy of the GNU General Public License
 # along with weechat-matrix-ui.  If not, see <http://www.gnu.org/licenses/>.
+
+import_ok = True
+
+try:
+    import weechat
+except ImportError:
+    print("This script must be run under WeeChat.")
+    print("Get WeeChat now at: http://www.weechat.org/")
+    import_ok = False
+
+class WeechatOptions:
+
+    # Gets options pertinent to wui
+    def __init__(self, globs):
+        # temp = weechat.config_get("%s.buffer.favorites")
+        self.favorites = list()
+        self.globs = globs
+
+    # must be called before any methods
+    def refresh(self):
+        fav_pointer = weechat.config_get("%s.buffer.favorites" % self.globs["CONFIG_FILE_NAME"])
+        self.favorites = weechat.config_string(fav_pointer).split(',')
+
+    def favorites(self):
+        if not self.favorites:
+            self.refresh()
+        self.favorites
+
+    def add_favorite(self, val):
+        if not self.favorites:
+            self.refresh()
+        self.favorites.append(val)
+        weechat.command("", "/set %s.buffer.favorites %s" % (self.globs["CONFIG_FILE_NAME"], ','.join(self.favorites)))
+
+    def del_favorite(self, val):
+        print(val)
+        print(self.favorites)
+        if not self.favorites:
+            self.refresh()
+        if val not in self.favorites:
+            weechat.prnt("", "%s not in favorites" % val)
+            return
+        else:
+            self.favorites.remove(val)
+            if self.favorites == ['']:
+                weechat.command("", "/set %s.buffer.favorites \"\"" % (self.globs["CONFIG_FILE_NAME"]))
+            else:
+                weechat.command("", "/set %s.buffer.favorites %s" % (self.globs["CONFIG_FILE_NAME"], ','.join(self.favorites)))
+        return weechat.WEECHAT_RC_OK

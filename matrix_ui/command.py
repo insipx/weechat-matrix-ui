@@ -18,7 +18,8 @@ import_ok = True
 
 from .globals import (
     SCRIPT_COMMAND,
-    CONFIG_FILE_NAME
+    CONFIG_FILE_NAME,
+    OPTIONS
 )
 
 try:
@@ -27,11 +28,6 @@ except ImportError:
     print("This script must be run under WeeChat.")
     print("Get WeeChat now at: http://www.weechat.org/")
     import_ok = False
-
-def favorites():
-    favorites = weechat.config_get("weechat-matrix-ui.buffer.favorites")
-    favorites = weechat.config_string(favorites)
-    return favorites.split(',')
 
 def wui_cmd(data, buffer, args):
     """Callback for /buffer_autoset command."""
@@ -45,22 +41,12 @@ def wui_cmd(data, buffer, args):
             if len(argv) < 2:
                 weechat.command("", "/help %s" % SCRIPT_COMMAND)
                 return weechat.WEECHAT_RC_OK
-            favs = favorites()
-            favs.append(argv[1])
-            new_val = ','.join(favs)
-            weechat.command("", "/set %s.buffer.favorites %s" % (CONFIG_FILE_NAME, new_val))
+            OPTIONS.add_favorite(argv[1])
         elif argv[0] == "del":
             if len(argv) < 2:
                 weechat.command("", "/help %s" % SCRIPT_COMMAND)
                 return weechat.WEECHAT_RC_OK
-            favs = favorites()
-            if argv[1] not in favs:
-                weechat.prnt("", "%s not in favorites" % argv[1])
-                return weechat.WEECHAT_RC_OK
-            else:
-                favs.remove(argv[1])
-                new_val = ','.join(favs)
-                weechat.command("", "/set %s.buffer.favorites %s" % (CONFIG_FILE_NAME, new_val))
+            OPTIONS.del_favorite(argv[1])
         else:
             weechat.command("", "/help %s" % SCRIPT_COMMAND)
             return weechat.WEECHAT_RC_OK
