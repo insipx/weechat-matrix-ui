@@ -87,7 +87,6 @@ if __name__ == "__main__" and import_ok:
         else:
             config_init()
             config_read()
-
             weechat.hook_command(
                 SCRIPT_COMMAND,
                 "Hides Matrix Buffers unless there is activity",
