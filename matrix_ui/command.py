@@ -47,6 +47,12 @@ def wui_cmd(data, buffer, args):
                 weechat.command("", "/help %s" % SCRIPT_COMMAND)
                 return weechat.WEECHAT_RC_OK
             OPTIONS.del_favorite(argv[1])
+        elif argv[0] == "list":
+            if len(argv) > 1:
+                weechat.command("", "/help %s" % SCRIPT_COMMAND)
+                return weechat.WEECHAT_RC_OK
+            OPTIONS.list_favorites()
+
         else:
             weechat.command("", "/help %s" % SCRIPT_COMMAND)
             return weechat.WEECHAT_RC_OK

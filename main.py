@@ -1,15 +1,16 @@
 import_ok = True
 
-from matrix_ui._weechat import (
+from matrix_ui.callbacks import (
     config_buffer_create_option_cb,
     config_reload_cb,
     config_option_cb,
+    signal_hotlist_changed_cb,
+    signal_buffer_opened_cb
 )
 
 from matrix_ui.buffers import (
     handle_hotlist,
-    signal_hotlist_changed_cb,
-    signal_buffer_opened_cb
+
 )
 
 from matrix_ui.command import (

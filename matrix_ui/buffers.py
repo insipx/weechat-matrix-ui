@@ -14,10 +14,6 @@
 # You should have received a copy of the GNU General Public License
 # along with weechat-matrix-ui.  If not, see <http://www.gnu.org/licenses/>.
 
-from .globals import (
-    CONFIG_FILE_NAME
-)
-
 try:
     import weechat
 except ImportError:
@@ -25,26 +21,14 @@ except ImportError:
     print("Get WeeChat now at: http://www.weechat.org")
     import_ok = False
 
-keep_alive_channels = []
+class Buffers:
+    def __init__(self, globs):
+        self.buffers = dict()
+        self.keep_alive = list()
+        self.globs = globs
 
-# ==================================[ callbacks ]==================================
-def signal_buffer_opened_cb(data, signal, signal_data):
-    global options
-    buffer = signal_data
-    apply_options_for_buffer(buffer)
-    return weechat.WEECHAT_RC_OK
-
-def signal_hotlist_changed_cb(data, signal, signal_data):
-    global options
-    buffer = signal_data
-    script_name = weechat.buffer_get_string(buffer, "localvar_script_name")
-    short_name = weechat.buffer_get_string(buffer, "short_name")
-    notify_level = weechat.buffer_get_integer(buffer, "notify")
-    if script_name == "matrix" and notify_level > 0:
-        weechat.buffer_set(buffer, "hidden", "0")
-    elif script_name == "matrix" and notify_level <= 0:
-        weechat.buffer_set(buffer, "hidden", "1")
-    return weechat.WEECHAT_RC_OK
+    def refresh(self):
+        print("hello")
 
 # ==================================[ funcs ]==================================
 

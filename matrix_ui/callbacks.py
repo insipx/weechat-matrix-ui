@@ -1,20 +1,3 @@
-# Copyright 2017-2019 Parity Technologies (UK) Ltd.
-# This file is part of weechat-matrix-ui.
-
-# weechat-matrix-ui is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-
-# weechat-matrix-ui is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-
-# You should have received a copy of the GNU General Public License
-# along with weechat-matrix-ui.  If not, see <http://www.gnu.org/licenses/>.
-
-import_ok = True
 from .globals import (
     CONFIG_FILE_NAME
 )
@@ -23,10 +6,28 @@ try:
     import weechat
 except ImportError:
     print("This script must be run under WeeChat.")
-    print("Get WeeChat now at: http://www.weechat.org/")
+    print("Get WeeChat now at: http://www.weechat.org")
     import_ok = False
 
-# ==================================[ callbacks ]==================================
+#! Entry Point for Weechat Functions (Except for completion, look in command.py for auto-complete)
+
+def signal_buffer_opened_cb(data, signal, signal_data):
+    global options
+    buffer = signal_data
+    apply_options_for_buffer(buffer)
+    return weechat.WEECHAT_RC_OK
+
+def signal_hotlist_changed_cb(data, signal, signal_data):
+    global options
+    buffer = signal_data
+    script_name = weechat.buffer_get_string(buffer, "localvar_script_name")
+    short_name = weechat.buffer_get_string(buffer, "short_name")
+    notify_level = weechat.buffer_get_integer(buffer, "notify")
+    if script_name == "matrix" and notify_level > 0:
+        weechat.buffer_set(buffer, "hidden", "0")
+    elif script_name == "matrix" and notify_level <= 0:
+        weechat.buffer_set(buffer, "hidden", "1")
+    return weechat.WEECHAT_RC_OK
 
 def config_buffer_create_option_cb(data, config_file, section, option_name,
                                    value):
