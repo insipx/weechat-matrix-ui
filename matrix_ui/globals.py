@@ -18,6 +18,7 @@ import_ok = True
 
 from .options import WeechatOptions
 from .buffers import Buffers
+from .rofi import FuzzySelect
 
 try:
     import weechat
@@ -48,3 +49,4 @@ glob_map = {
 # Class is exposed to callbacks or whatever needs them
 OPTIONS = WeechatOptions(glob_map)
 BUFFERS = Buffers(OPTIONS)
+FUZZY_SELECT = FuzzySelect(BUFFERS, OPTIONS)

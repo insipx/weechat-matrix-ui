@@ -84,6 +84,10 @@ class Buffer:
             logging.debug("not hiding because buffer is a server")
             return False
 
+        if self.full_name == "fset.fset":
+            logging.debug("Not hiding because buffer is fset.fset")
+            return False
+
         if self.full_name == "core.weechat":
             logging.debug("Not hiding because buffer is core.weechat")
             return False

@@ -20,7 +20,8 @@ from .globals import (
     SCRIPT_COMMAND,
     CONFIG_FILE_NAME,
     OPTIONS,
-    BUFFERS
+    BUFFERS,
+    FUZZY_SELECT
 )
 
 try:
@@ -33,31 +34,48 @@ except ImportError:
 def wui_cmd(data, buffer, args):
     """Callback for /buffer_autoset command."""
     args = args.strip()
-    if args == "":
-        weechat.command("", "/set %s.buffer.*" % CONFIG_FILE_NAME)
-        return weechat.WEECHAT_RC_OK
     argv = args.split(None, 3)
     if len(argv) > 0:
         if argv[0] == "add":
-            if len(argv) < 2:
-                weechat.command("", "/help %s" % SCRIPT_COMMAND)
-                return weechat.WEECHAT_RC_OK
             OPTIONS.add_favorite(argv[1])
         elif argv[0] == "del":
+            OPTIONS.del_favorite(argv[1])
+        elif argv[0] == "list":
+            OPTIONS.list_favorites()
+        elif argv[0] == "refresh":
+            BUFFERS.refresh()
+        elif argv[0] == "buffer":
             if len(argv) < 2:
                 weechat.command("", "/help %s" % SCRIPT_COMMAND)
                 return weechat.WEECHAT_RC_OK
-            OPTIONS.del_favorite(argv[1])
-        elif argv[0] == "list":
-            if len(argv) > 1:
-                weechat.command("", "/help %s" % SCRIPT_COMMAND)
-                return weechat.WEECHAT_RC_OK
-            OPTIONS.list_favorites()
-        elif argv[0] == "refresh":
-            if len(argv) > 1:
+            elif argv[1] == "list":
+                buflist = BUFFERS.get_buffers()
+                if len(argv) == 2:
+                    for b in buflist:
+                        weechat.prnt("", "{}: {}".format(b.short_name, b.name))
+                elif len(argv) < 3:
+                    weechat.command("", "/help %s" % SCRIPT_COMMAND)
+                    return weechat.WEECHAT_RC_OK
+                elif argv[2] == "matrix":
+                    for b in buflist:
+                        if b.is_matrix():
+                            weechat.prnt("", "{}: {}".format(b.short_name, b.name))
+                elif argv[2] == "irc":
+                    for b in buflist:
+                        if not b.is_matrix():
+                            weechat.prnt("", "{}: {}".format(b.short_name, b.name))
+        elif argv[0] == "select":
+            if len(argv) < 2:
                 weechat.command("", "help %s" % SCRIPT_COMMAND)
                 return weechat.WEECHAT_RC_OK
-            BUFFERS.refresh()
+            if argv[1] == "buffer":
+                FUZZY_SELECT.select_any_buffer()
+            elif argv[1] == "channel":
+                FUZZY_SELECT.select_channels()
+            elif argv[1] == "pm":
+                FUZZY_SELECT.select_pms()
+            elif argv[1] == "matrix":
+                FUZZY_SELECT.select_matrix()
         else:
             weechat.command("", "/help %s" % SCRIPT_COMMAND)
             return weechat.WEECHAT_RC_OK

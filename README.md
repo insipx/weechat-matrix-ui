@@ -14,6 +14,7 @@
   - [ ] search only PM's or Buffers with rofi
 - [ ] bind weechat buffers with a per-server leader key
 - [ ] option for hiding all (including irc) or just matrix buffers
+- [ ] autocomplete with weechat-matrix short_names
 
 ##### Command in weechat: `wui`
 

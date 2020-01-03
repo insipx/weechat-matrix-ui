@@ -30,6 +30,7 @@ class WeechatOptions:
         # temp = weechat.config_get("%s.buffer.favorites")
         self.favorites = list()
         self.globs = globs
+        self. rofi = ''
 
     # must be called before any methods
     def refresh(self):

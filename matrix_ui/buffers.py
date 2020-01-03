@@ -33,6 +33,29 @@ class Buffers:
         self.to_hide = list()
         # self.hotlist_infolist = str
 
+    # Accepts a function that takes a buffer object and returns a boolean
+    def get_buffer(self, fun):
+        return list(filter(lambda b: fun(b), self.buffers.values()))[0]
+
+    # Get all buffres
+    def get_buffers(self):
+        logging.debug("{}".format(self.buffers.values()))
+        return self.buffers.values()
+
+    # Buffers that are not private
+    def get_channels(self):
+        return list(filter(lambda b: not b.is_private(), self.buffers.values()))
+
+    def get_pm_buffers(self):
+        return list(filter(lambda b: b.is_private(), self.buffers.values()))
+
+    def get_matrix_buffers(self):
+        return list(filter(lambda b: b.is_matrix(), self.buffers.values()))
+
+    # accepts a buffer object that will be hidden as soon as it is hideable
+    def set_to_hide(self, buffer):
+        self.to_hide.append(buffer)
+
     # `buffer` must be buffer pointer
     def on_buffer_kill(self, buffer):
         try:
