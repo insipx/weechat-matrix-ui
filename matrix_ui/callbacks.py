@@ -1,32 +1,36 @@
-# Copyright 2017-2019 Parity Technologies (UK) Ltd.
-# This file is part of weechat-matrix-ui.
-
-# weechat-matrix-ui is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-
-# weechat-matrix-ui is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-
-# You should have received a copy of the GNU General Public License
-# along with weechat-matrix-ui.  If not, see <http://www.gnu.org/licenses/>.
-
-import_ok = True
 from .globals import (
-    CONFIG_FILE_NAME
+    CONFIG_FILE_NAME,
+    BUFFERS
 )
 
 try:
     import weechat
 except ImportError:
     print("This script must be run under WeeChat.")
-    print("Get WeeChat now at: http://www.weechat.org/")
+    print("Get WeeChat now at: http://www.weechat.org")
     import_ok = False
 
-# ==================================[ callbacks ]==================================
+#! Entry Point for Weechat Functions (Except for completion, look in command.py for auto-complete)
+
+def signal_buffer_opened_cb(data, signal, signal_data):
+    BUFFERS.on_buffer_open(signal_data)
+    return weechat.WEECHAT_RC_OK
+
+def signal_buffer_closed_cb(data, signal, signal_data):
+    BUFFERS.on_buffer_kill(signal_data)
+    return weechat.WEECHAT_RC_OK
+
+def signal_buffer_switched_cb(data, signal, signal_data):
+    BUFFERS.on_buffer_switch(signal_data)
+    return weechat.WEECHAT_RC_OK
+
+def signal_hotlist_changed_cb(data, signal, signal_data):
+    BUFFERS.on_hotlist_changed(signal_data)
+    return weechat.WEECHAT_RC_OK
+
+def config_reload_cb(data, config_file):
+    """Reload configuration file."""
+    return weechat.config_reload(config_file)
 
 def config_buffer_create_option_cb(data, config_file, section, option_name,
                                    value):
@@ -40,10 +44,6 @@ def config_buffer_create_option_cb(data, config_file, section, option_name,
         if not option:
             return weechat.WEECHAT_CONFIG_OPTION_SET_ERROR
         return weechat.WEECHAT_CONFIG_OPTION_SET_OK_SAME_VALUE
-
-def config_reload_cb(data, config_file):
-    """Reload configuration file."""
-    return weechat.config_reload(config_file)
 
 def config_option_cb(data, option, value):
 

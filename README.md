@@ -13,6 +13,7 @@
   - [ ] keybind to show/hide private messages
   - [ ] search only PM's or Buffers with rofi
 - [ ] bind weechat buffers with a per-server leader key
+- [ ] option for hiding all (including irc) or just matrix buffers
 
 ##### Command in weechat: `wui`
 

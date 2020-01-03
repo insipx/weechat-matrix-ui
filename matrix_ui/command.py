@@ -19,7 +19,8 @@ import_ok = True
 from .globals import (
     SCRIPT_COMMAND,
     CONFIG_FILE_NAME,
-    OPTIONS
+    OPTIONS,
+    BUFFERS
 )
 
 try:
@@ -47,6 +48,16 @@ def wui_cmd(data, buffer, args):
                 weechat.command("", "/help %s" % SCRIPT_COMMAND)
                 return weechat.WEECHAT_RC_OK
             OPTIONS.del_favorite(argv[1])
+        elif argv[0] == "list":
+            if len(argv) > 1:
+                weechat.command("", "/help %s" % SCRIPT_COMMAND)
+                return weechat.WEECHAT_RC_OK
+            OPTIONS.list_favorites()
+        elif argv[0] == "refresh":
+            if len(argv) > 1:
+                weechat.command("", "help %s" % SCRIPT_COMMAND)
+                return weechat.WEECHAT_RC_OK
+            BUFFERS.refresh()
         else:
             weechat.command("", "/help %s" % SCRIPT_COMMAND)
             return weechat.WEECHAT_RC_OK

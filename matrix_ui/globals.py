@@ -17,6 +17,7 @@
 import_ok = True
 
 from .options import WeechatOptions
+from .buffers import Buffers
 
 try:
     import weechat
@@ -43,4 +44,7 @@ glob_map = {
     'CONFIG_FILE_NAME': CONFIG_FILE_NAME
 }
 
+# Global Classes. Manage state within the class rather than stand-alone functions.
+# Class is exposed to callbacks or whatever needs them
 OPTIONS = WeechatOptions(glob_map)
+BUFFERS = Buffers(OPTIONS)
