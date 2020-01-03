@@ -1,5 +1,6 @@
 from .globals import (
-    CONFIG_FILE_NAME
+    CONFIG_FILE_NAME,
+    BUFFERS
 )
 
 try:
@@ -12,22 +13,24 @@ except ImportError:
 #! Entry Point for Weechat Functions (Except for completion, look in command.py for auto-complete)
 
 def signal_buffer_opened_cb(data, signal, signal_data):
-    global options
-    buffer = signal_data
-    apply_options_for_buffer(buffer)
+    BUFFERS.on_buffer_open(signal_data)
+    return weechat.WEECHAT_RC_OK
+
+def signal_buffer_closed_cb(data, signal, signal_data):
+    BUFFERS.on_buffer_kill(signal_data)
+    return weechat.WEECHAT_RC_OK
+
+def signal_buffer_switched_cb(data, signal, signal_data):
+    BUFFERS.on_buffer_switch(signal_data)
     return weechat.WEECHAT_RC_OK
 
 def signal_hotlist_changed_cb(data, signal, signal_data):
-    global options
-    buffer = signal_data
-    script_name = weechat.buffer_get_string(buffer, "localvar_script_name")
-    short_name = weechat.buffer_get_string(buffer, "short_name")
-    notify_level = weechat.buffer_get_integer(buffer, "notify")
-    if script_name == "matrix" and notify_level > 0:
-        weechat.buffer_set(buffer, "hidden", "0")
-    elif script_name == "matrix" and notify_level <= 0:
-        weechat.buffer_set(buffer, "hidden", "1")
+    BUFFERS.on_hotlist_changed(signal_data)
     return weechat.WEECHAT_RC_OK
+
+def config_reload_cb(data, config_file):
+    """Reload configuration file."""
+    return weechat.config_reload(config_file)
 
 def config_buffer_create_option_cb(data, config_file, section, option_name,
                                    value):
@@ -41,10 +44,6 @@ def config_buffer_create_option_cb(data, config_file, section, option_name,
         if not option:
             return weechat.WEECHAT_CONFIG_OPTION_SET_ERROR
         return weechat.WEECHAT_CONFIG_OPTION_SET_OK_SAME_VALUE
-
-def config_reload_cb(data, config_file):
-    """Reload configuration file."""
-    return weechat.config_reload(config_file)
 
 def config_option_cb(data, option, value):
 

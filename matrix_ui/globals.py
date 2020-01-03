@@ -47,4 +47,4 @@ glob_map = {
 # Global Classes. Manage state within the class rather than stand-alone functions.
 # Class is exposed to callbacks or whatever needs them
 OPTIONS = WeechatOptions(glob_map)
-BUFFERS = Buffers(glob_map)
+BUFFERS = Buffers(OPTIONS)

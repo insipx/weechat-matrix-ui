@@ -36,6 +36,11 @@ class WeechatOptions:
         fav_pointer = weechat.config_get("%s.buffer.favorites" % self.globs["CONFIG_FILE_NAME"])
         self.favorites = weechat.config_string(fav_pointer).split(',')
 
+    def get_favorites(self):
+        if not self.favorites:
+            self.refresh()
+        return self.favorites
+
     # List favorites
     def list_favorites(self):
         if not self.favorites:

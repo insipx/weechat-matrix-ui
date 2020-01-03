@@ -1,16 +1,14 @@
 import_ok = True
 
+import logging
+
 from matrix_ui.callbacks import (
     config_buffer_create_option_cb,
     config_reload_cb,
     config_option_cb,
     signal_hotlist_changed_cb,
-    signal_buffer_opened_cb
-)
-
-from matrix_ui.buffers import (
-    handle_hotlist,
-
+    signal_buffer_opened_cb,
+    signal_buffer_switched_cb,
 )
 
 from matrix_ui.command import (
@@ -26,7 +24,8 @@ from matrix_ui.globals import (
     SCRIPT_LICENSE,
     SCRIPT_DESC,
     SCRIPT_COMMAND,
-    CONFIG_FILE_NAME
+    CONFIG_FILE_NAME,
+    BUFFERS
 )
 
 try:
@@ -79,6 +78,8 @@ def config_write():
 # ==================================[ main ]==================================
 
 if __name__ == "__main__" and import_ok:
+    logging.basicConfig(level='DEBUG', filename='wui.log', filemode='a', format='%(name)s - %(levelname)s - %(message)s')
+    logging.info("Logging Initiated")
     if weechat.register(SCRIPT_NAME, SCRIPT_AUTHOR, SCRIPT_VERSION,
                         SCRIPT_LICENSE, SCRIPT_DESC, "unload_script", ""):
         version = weechat.info_get("version_number", "") or 0
@@ -111,19 +112,17 @@ if __name__ == "__main__" and import_ok:
             weechat.hook_signal("9000|buffer_opened",
                         "signal_buffer_opened_cb", "")
 
+            weechat.hook_signal("8500|buffer_switch",
+                                "signal_buffer_switched_cb", "")
+
             weechat.hook_signal("hotlist_changed", "signal_hotlist_changed_cb", "")
 
             weechat.hook_config("%s.buffer.*" % CONFIG_FILE_NAME,
                                 "config_option_cb", "")
 
-            handle_hotlist()
             # apply settings to all already opened buffers
-            buffers = weechat.infolist_get("buffer", "", "")
-            if buffers:
-                while weechat.infolist_next(buffers):
-                    buffer = weechat.infolist_pointer(buffers, "pointer")
-                    signal_buffer_opened_cb("", "", buffer)
-                weechat.infolist_free(buffers)
+            BUFFERS.refresh()
+          
 
 
 # ==================================[ end ]===================================

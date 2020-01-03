@@ -14,6 +14,9 @@
 # You should have received a copy of the GNU General Public License
 # along with weechat-matrix-ui.  If not, see <http://www.gnu.org/licenses/>.
 
+from matrix_ui.buffer.buffer import Buffer
+import logging
+
 try:
     import weechat
 except ImportError:
@@ -22,85 +25,110 @@ except ImportError:
     import_ok = False
 
 class Buffers:
-    def __init__(self, globs):
+    def __init__(self, opts):
         self.buffers = dict()
-        self.keep_alive = list()
-        self.globs = globs
+        self.hotlist = dict()
+        self.opts = opts
+        # List of buffers that need to be hidden as soon as possible
+        self.to_hide = list()
+        # self.hotlist_infolist = str
 
+    # `buffer` must be buffer pointer
+    def on_buffer_kill(self, buffer):
+        try:
+            self.buffers.pop(full_name(buffer))
+        except KeyError:
+            print("Key not in Buffers")
+
+    # `buffer` must be buffer pointer
+    def on_buffer_open(self, buffer):
+        self.buffers[full_name(buffer)] = Buffer(buffer, self.opts)
+        self.try_hide(self.buffers[full_name(buffer)])
+
+    # buffer must be buffer pointer
+    # argument passed to on_hotlist_changed may be null, so need to
+    # refresh entire list
+    def on_hotlist_changed(self, buffer):
+        self.refresh_hotlist()
+
+    # just refresh hotlist
+    def on_buffer_switch(self, buffer):
+        name = full_name(buffer)
+        if name == "core.weechat":
+            return
+        else:
+            buffer = self.buffers[full_name(buffer)]
+            for b in self.to_hide:
+                self.try_hide(b)
+   
+    # Refresh the classes internal state
     def refresh(self):
-        print("hello")
-
-# ==================================[ funcs ]==================================
-
-def get_favorites(buffer):
-    favorites = weechat.config_get("%s.buffer.favorites" % CONFIG_FILE_NAME)
-    favorites = weechat.config_string(favorites)
-    return favorites.split(',')
-
-def apply_options_for_buffer(buffer):
-    full_name = weechat.buffer_get_string(buffer, "full_name")
-    short_name = weechat.buffer_get_string(buffer, "short_name")
-    script_name = weechat.buffer_get_string(buffer, "localvar_script_name")
-    buffer_type = weechat.buffer_get_string(buffer, "localvar_type")
-
-    favorites = get_favorites(buffer)
-
-    if short_name not in favorites and script_name == "matrix":
-        maybe_hide_buffer(buffer)
-    handle_hotlist
-
-def maybe_hide_buffer(buffer):
-    if buffer_is_hideable(buffer):
-        # weechat.prnt("", "HIDING: %s" % weechat.buffer_get_string(buffer, "short_name"))
-        weechat.buffer_set(buffer, "hidden", "1")
-
-def buffer_is_hideable(buffer):
-    """Check if passed buffer can be hidden.
-
-    If configuration option ``hide_private`` is enabled,
-    private buffers will become hidden as well.
-
-    If the previous buffer name matches any of the exemptions defined in ``exemptions``,
-    it will not become hidden.
-
-    :param buffer: Buffer string representation
-    """
-    if buffer == weechat.current_buffer():
-        return False
-
-    buffer_type = weechat.buffer_get_string(buffer, "localvar_type")
-
-    if buffer_type == "server":
-        return False
-
-    """
-    buffer_type = weechat.buffer_get_string(buffer, 'localvar_type')
-
-    if (buffer_type == "private"
-            and weechat.config_get_plugin("hide_private") == "off"):
-        return False
-    """
-
-    return True
+        self.refresh_buffers()
+        self.refresh_hotlist()
 
 
-def handle_hotlist():
-    global keep_alive_channels
-    hotlist_buffers = weechat.infolist_get("hotlist", "", "")
+    # refresh internal list of the hotlist
+    def refresh_hotlist(self):
 
-    if not hotlist_buffers:
-        return weechat.WEECHAT_RC_OK
+        hotlist_buffers = weechat.infolist_get("hotlist", "", "")
+        if not hotlist_buffers:
+            logging.debug("NO MORE HOTLIST!!!!!!!!!!!!!!!!!!!!!!!")
+            return weechat.WEECHAT_RC_OK
 
-    while True:
-        buffer = weechat.infolist_pointer(hotlist_buffers, "buffer_pointer")
-        full_name = weechat.buffer_get_string(buffer, "full_name")
-        short_name = weechat.buffer_get_string(buffer, "short_name")
-        script_name = weechat.buffer_get_string(buffer, "localvar_script_name")
-        if script_name == "matrix":
-            weechat.buffer_set(buffer, "hidden", "0")
-            keep_alive_channels.append(full_name)
-            weechat.prnt("", "BUFFER: %s" % short_name)
-        if not weechat.infolist_next(hotlist_buffers):
-            break
+        new_hotlist = dict()
+        while weechat.infolist_next(hotlist_buffers):
+            buffer = full_name(weechat.infolist_pointer(hotlist_buffers, "buffer_pointer"))
+            if buffer == "core.weechat":
+                continue
+            new_hotlist[buffer] = self.buffers[buffer]
+            buffer = new_hotlist[buffer]
+            if buffer.is_matrix():
+                buffer.show()
+                buffer.set_alive()
 
-    weechat.infolist_free(hotlist_buffers)
+        # Check if a value has been removed from the old hotlist
+        # hide it if it has (means that it has been checked)
+        removed = set(self.hotlist) - set(new_hotlist)
+        logging.debug("REMOVED: {}".format(list(map(lambda x: self.buffers[x].short_name, removed))))
+        for b in removed:
+            buf = self.buffers[b]
+            buf.unset_alive()
+            self.to_hide.append(buf)
+
+        weechat.infolist_free(hotlist_buffers)
+
+        self.hotlist = new_hotlist
+
+    # refresh internal list of all buffers
+    def refresh_buffers(self):
+        self.buffers.clear()
+        hdata = weechat.hdata_get("buffer")
+        buffer = weechat.hdata_get_list(hdata, "gui_buffers")
+
+        if not hdata or not buffer:
+            return weechat.WEECHAT_RC_OK
+        while True:
+            buffer = weechat.hdata_move(hdata, buffer, 1)
+            if not buffer:
+                break
+            else:
+                buf = self.buffers[full_name(buffer)] = Buffer(buffer, self.opts)
+                logging.debug("Hideable: {}".format(buf.is_hideable()))
+                self.try_hide(self.buffers[full_name(buffer)])
+
+    # `buffer` must be buffer object
+    def try_hide(self, buffer):
+        if buffer.is_matrix() and buffer.is_hideable():
+            buffer.hide()
+        else:
+            buffer.show()
+
+    def try_hide_all(self):
+        for buf in self.buffers:
+            self.hide(buf)
+
+def full_name(buffer):
+    return weechat.buffer_get_string(buffer, "full_name")
+
+def short_name(buffer):
+    return weechat.buffer_get_string(buffer, "short_name")
