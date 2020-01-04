@@ -9,6 +9,7 @@ from matrix_ui.callbacks import (
     signal_hotlist_changed_cb,
     signal_buffer_opened_cb,
     signal_buffer_switched_cb,
+    signal_buffer_changed_cb
 )
 
 from matrix_ui.command import (
@@ -23,9 +24,12 @@ from matrix_ui.globals import (
     SCRIPT_VERSION,
     SCRIPT_LICENSE,
     SCRIPT_DESC,
+    SCRIPT_SHORT_HELP,
+    SCRIPT_HELP,
     SCRIPT_COMMAND,
     CONFIG_FILE_NAME,
-    BUFFERS
+    LOG_LEVEL,
+    BUFFERS,
 )
 
 try:
@@ -78,7 +82,7 @@ def config_write():
 # ==================================[ main ]==================================
 
 if __name__ == "__main__" and import_ok:
-    logging.basicConfig(level='DEBUG', filename='wui.log', filemode='a', format='%(name)s - %(levelname)s - %(message)s')
+    logging.basicConfig(level=LOG_LEVEL, filename='.weechat/wui.log', filemode='a', format='%(name)s - %(levelname)s - %(message)s')
     logging.info("Logging Initiated")
     if weechat.register(SCRIPT_NAME, SCRIPT_AUTHOR, SCRIPT_VERSION,
                         SCRIPT_LICENSE, SCRIPT_DESC, "unload_script", ""):
@@ -91,8 +95,10 @@ if __name__ == "__main__" and import_ok:
             config_read()
             weechat.hook_command(
                 SCRIPT_COMMAND,
-                "Hides Matrix Buffers unless there is activity",
-                "", "", "",
+                SCRIPT_DESC,
+                SCRIPT_SHORT_HELP,
+                SCRIPT_HELP,
+                "", # autocomplete
                 "wui_cmd", "")
 
             """
@@ -110,18 +116,28 @@ if __name__ == "__main__" and import_ok:
             """
 
             weechat.hook_signal("9000|buffer_opened",
-                        "signal_buffer_opened_cb", "")
+                                "signal_buffer_opened_cb", "")
 
-            weechat.hook_signal("8500|buffer_switch",
+            weechat.hook_signal("8900|buffer_closed",
+                                "signal_buffer_closed_cb", "")
+
+            weechat.hook_signal("8800|buffer_switch",
                                 "signal_buffer_switched_cb", "")
+
+            weechat.hook_signal("8700|buffer_renamed",
+                                "signal_buffer_changed_cb", "")
+
+            weechat.hook_signal("irc_channel_opened",
+                                "signal_buffer_opened_cb", "")
 
             weechat.hook_signal("hotlist_changed", "signal_hotlist_changed_cb", "")
 
-            weechat.hook_config("%s.buffer.*" % CONFIG_FILE_NAME,
+            weechat.hook_config("%s.buffer.favorites" % CONFIG_FILE_NAME,
                                 "config_option_cb", "")
 
             # apply settings to all already opened buffers
             BUFFERS.refresh()
+            weechat.command("", "/key bind meta-t /wui select buffer")
           
 
 

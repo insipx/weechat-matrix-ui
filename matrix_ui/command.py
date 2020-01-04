@@ -40,8 +40,6 @@ def wui_cmd(data, buffer, args):
             OPTIONS.add_favorite(argv[1])
         elif argv[0] == "del":
             OPTIONS.del_favorite(argv[1])
-        elif argv[0] == "list":
-            OPTIONS.list_favorites()
         elif argv[0] == "refresh":
             BUFFERS.refresh()
         elif argv[0] == "buffer":
@@ -64,6 +62,9 @@ def wui_cmd(data, buffer, args):
                     for b in buflist:
                         if not b.is_matrix():
                             weechat.prnt("", "{}: {}".format(b.short_name, b.name))
+                elif argv[2] == "favorites":
+                    OPTOINS.list_favorites()
+
         elif argv[0] == "select":
             if len(argv) < 2:
                 weechat.command("", "help %s" % SCRIPT_COMMAND)

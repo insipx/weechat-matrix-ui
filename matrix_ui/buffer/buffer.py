@@ -23,9 +23,12 @@ except ImportError:
     print("Get WeeChat now: http://www.weechat.org")
     import_ok = False
 
-# Matrix Buffer Object. Manages Matrix Buffer Names.
-# Map Buffer Hash to Human-Readable name
+
 class Buffer:
+    """
+    Represents one weechat buffers
+    """
+
     # needs buffer and buffer pointer
     # creates a buffer object
     def __init__(self, buffer, opts):
@@ -70,6 +73,9 @@ class Buffer:
 
     def is_private(self):
         return self.type == "private"
+
+    def is_channe(self):
+        return self.type == "channel"
 
     def is_alive(self):
         if self.get_notify_level() > 0 and self.keep_alive:

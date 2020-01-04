@@ -31,9 +31,30 @@ SCRIPT_NAME = "matrix-ui"
 SCRIPT_AUTHOR = "Andrew Plaza <dev@andrewplaza.dev>"
 SCRIPT_VERSION = "0.1"
 SCRIPT_LICENSE = "GPL3"
-SCRIPT_DESC = "Hide Matrix Buffers on inactvity, and put private messages in merge buffer"
+SCRIPT_DESC = "Hide Matrix Buffers on inactivity, and put private messages in merge buffer"
+SCRIPT_SHORT_HELP = "[add <buffer>] | [del <buffer>] | [buffer <list [matrix, irc]> | [select <buffer, matrix, pm, channel>]]"
 SCRIPT_COMMAND = "wui"
 CONFIG_FILE_NAME = "weechat-matrix-ui"
+LOG_LEVEL="CRITICAL"
+SCRIPT_HELP =   ("    add: Add a buffer to favorites\n"
+                "    del: Delete a buffer from favorites\n" +
+                "    buffer: List all buffers, or just matrix and irc buffers\n" +
+                "    select: Select a any buffer, or a specific matrix, irc or private buffer with rofi\n" +
+                "    Examples:\n" +
+                "    list all buffer short names: full name:\n" +
+                "       /" + SCRIPT_COMMAND + " buffer list\n" +
+                "    list only matrix buffer short names: full names(matrix ID):\n" +
+                "       /" + SCRIPT_COMMAND + " buffer list matrix\n" +
+                "    select from all buffers with rofi:\n" +
+                "       /" + SCRIPT_COMMAND + " select buffer\n" +
+                "    select only private channels with rofi:\n" +
+                "       /" + SCRIPT_COMMAND + " select pm\n" +
+                "    add a buffer to favorites:\n" +
+                "       /" + SCRIPT_COMMAND + " add #weechat-matrix\n" +
+                "    delete a buffer from favorites:\n" +
+                "       /" + SCRIPT_COMMAND + " del #weechat-matrix\n" +
+                "     list buffers in favorites:\n" +
+                "       /" + SCRIPT_COMMAND + " buffer list favorites\n")
 
 glob_map = {
     'SCRIPT_NAME': SCRIPT_NAME,
@@ -41,7 +62,10 @@ glob_map = {
     'SCRIPT_VERSION': SCRIPT_VERSION,
     'SCRIPT_LICENSE': SCRIPT_LICENSE,
     'SCRIPT_DESC': SCRIPT_DESC,
+    'SCRIPT_SHORT_HELP': SCRIPT_SHORT_HELP,
+    'SCRIPT_HELP': SCRIPT_HELP,
     'SCRIPT_COMMAND': SCRIPT_COMMAND,
+    'LOG_LEVEL': LOG_LEVEL,
     'CONFIG_FILE_NAME': CONFIG_FILE_NAME
 }
 

@@ -31,6 +31,11 @@ class WeechatOptions:
         self.favorites = list()
         self.globs = globs
         self. rofi = ''
+    def new_section(self):
+        print('')
+
+    def add_to_section(self):
+        print('')
 
     # must be called before any methods
     def refresh(self):

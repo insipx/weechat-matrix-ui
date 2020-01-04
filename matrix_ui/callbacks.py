@@ -24,6 +24,10 @@ def signal_buffer_switched_cb(data, signal, signal_data):
     BUFFERS.on_buffer_switch(signal_data)
     return weechat.WEECHAT_RC_OK
 
+def signal_buffer_changed_cb(data, signal, signal_data):
+    BUFFERS.on_buffer_changed(signal_data)
+    return weechat.WEECHAT_RC_OK
+
 def signal_hotlist_changed_cb(data, signal, signal_data):
     BUFFERS.on_hotlist_changed(signal_data)
     return weechat.WEECHAT_RC_OK
@@ -46,26 +50,8 @@ def config_buffer_create_option_cb(data, config_file, section, option_name,
         return weechat.WEECHAT_CONFIG_OPTION_SET_OK_SAME_VALUE
 
 def config_option_cb(data, option, value):
-
+    # Refresh buffers when favorites change
     if not weechat.config_get(option):  # option was deleted
         return weechat.WEECHAT_RC_OK
-
-    option = option[len("%s.buffer." % CONFIG_FILE_NAME):]
-
-    pos = option.rfind(".")
-    if pos > 0:
-        buffer_mask = option[0:pos]
-        property = option[pos+1:]
-        if buffer_mask and property:
-            buffers = weechat.infolist_get("buffer", "", buffer_mask)
-
-            if not buffers:
-                return weechat.WEECHAT_RC_OK
-
-            while weechat.infolist_next(buffers):
-                buffer = weechat.infolist_pointer(buffers, "pointer")
-                weechat.buffer_set(buffer, property, value)
-
-            weechat.infolist_free(buffers)
-
+    BUFFERS.refresh()
     return weechat.WEECHAT_RC_OK

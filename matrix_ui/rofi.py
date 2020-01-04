@@ -33,44 +33,30 @@ class FuzzySelect:
         else:
             self.rofi = Rofi(self.opts.ROFI)
 
+    # Accepts a predicate which returs list of buffers
+    def select(self, bufs, name):
+        buf_names = list(map(lambda x: x.short_name, bufs))
+        logging.debug("Buf Names: {}".format(buf_names))
+        index, key = self.rofi.select(name, buf_names,
+                                      rofi_args=['-i'])
+        if index == -1:
+            return
+        logging.debug("Index: {}, Key: {}".format(index, key))
+        selected_buffer = self.buffers.get_buffer(lambda b: b.short_name == buf_names[index])
+        selected_buffer.show()
+        self.buffers.set_to_hide(selected_buffer)
+        weechat.command("", "/buffer {}".format(selected_buffer.full_name))
+
     # TODO This code can be made much cleaner
     # Alt + t
     def select_any_buffer(self):
-        buf_names = list(map(lambda x: x.short_name, self.buffers.get_buffers()))
-        index, key = self.rofi.select('Buffers', buf_names,
-                                      rofi_args=['-i'])
-        logging.debug("Index: {}, Key: {}".format(index, key))
-        selected_buffer = self.buffers.get_buffer(lambda b: b.short_name == buf_names[index])
-        selected_buffer.show()
-        self.buffers.set_to_hide(selected_buffer)
-        weechat.command("", "/buffer {}".format(selected_buffer.full_name))
+        self.select(self.buffers.get_buffers(), "Buffers")
 
     def select_channels(self):
-        buf_names = list(map(lambda x: x.short_name, self.buffers.get_channels()))
-        index, key = self.rofi.select('Channels', buf_names,
-                                      rofi_args=['-i'])
-        logging.debug("Index: {}, Key: {}".format(index, key))
-        selected_buffer = self.buffers.get_buffer(lambda b: b.short_name == buf_names[index])
-        selected_buffer.show()
-        self.buffers.set_to_hide(selected_buffer)
-        weechat.command("", "/buffer {}".format(selected_buffer.full_name))
+        self.select(self.buffers.get_channels(), "Channels")
 
     def select_pms(self):
-        buf_names = list(map(lambda x: x.short_name, self.buffers.get_pm_buffers()))
-        index, key = self.rofi.select('PMs', buf_names,
-                                      rofi_args=['-i'])
-        logging.debug("Index: {}, Key: {}".format(index, key))
-        selected_buffer = self.buffers.get_buffer(lambda b: b.short_name == buf_names[index])
-        selected_buffer.show()
-        self.buffers.set_to_hide(selected_buffer)
-        weechat.command("", "/buffer {}".format(selected_buffer.full_name))
+        self.select(self.buffers.get_pm_buffers(), "PM")
 
     def select_matrix(self):
-        buf_names = list(map(lambda x: x.short_name, self.buffers.get_matrix_buffers()))
-        index, key = self.rofi.select('Matrix', buf_names,
-                                      rofi_args=['-i'])
-        logging.debug("Index: {}, Key: {}".format(index, key))
-        selected_buffer = self.buffers.get_buffer(lambda b: b.short_name == buf_names[index])
-        selected_buffer.show()
-        self.buffers.set_to_hide(selected_buffer)
-        weechat.command("", "/buffer {}".format(selected_buffer.full_name))
+        self.select(self.buffers.get_matrix_buffers(), "Matrix")

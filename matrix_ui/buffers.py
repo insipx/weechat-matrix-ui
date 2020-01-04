@@ -24,7 +24,16 @@ except ImportError:
     print("Get WeeChat now at: http://www.weechat.org")
     import_ok = False
 
+# TODO: Sometimes a matrix buffer will come in as 'private' when first loaded,
+# but then switch to 'channel'. executing `/wui refresh` fixes this issue
+
 class Buffers:
+    """
+    General buffers class to
+    keep track of buffers in weechat
+    also keeps track of which buffers are in the hotlist
+    and provides functions to connect to hooks to do with buffers
+    """
     def __init__(self, opts):
         self.buffers = dict()
         self.hotlist = dict()
@@ -44,7 +53,7 @@ class Buffers:
 
     # Buffers that are not private
     def get_channels(self):
-        return list(filter(lambda b: not b.is_private(), self.buffers.values()))
+        return list(filter(lambda b: b.is_channel(), self.buffers.values()))
 
     def get_pm_buffers(self):
         return list(filter(lambda b: b.is_private(), self.buffers.values()))
@@ -68,6 +77,10 @@ class Buffers:
         self.buffers[full_name(buffer)] = Buffer(buffer, self.opts)
         self.try_hide(self.buffers[full_name(buffer)])
 
+    # `buffer` must be buffer pointer
+    def on_buffer_changed(self, buffer):
+        self.refresh()
+
     # buffer must be buffer pointer
     # argument passed to on_hotlist_changed may be null, so need to
     # refresh entire list
@@ -83,7 +96,7 @@ class Buffers:
             buffer = self.buffers[full_name(buffer)]
             for b in self.to_hide:
                 self.try_hide(b)
-   
+
     # Refresh the classes internal state
     def refresh(self):
         self.refresh_buffers()
