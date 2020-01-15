@@ -35,7 +35,7 @@ SCRIPT_DESC = "Hide Matrix Buffers on inactivity, and put private messages in me
 SCRIPT_SHORT_HELP = "[add <buffer>] | [del <buffer>] | [buffer <list [matrix, irc]> | [select <buffer, matrix, pm, channel>]]"
 SCRIPT_COMMAND = "wui"
 CONFIG_FILE_NAME = "weechat-matrix-ui"
-LOG_LEVEL="CRITICAL"
+LOG_LEVEL="DEBUG"
 SCRIPT_HELP =   ("    add: Add a buffer to favorites\n"
                 "    del: Delete a buffer from favorites\n" +
                 "    buffer: List all buffers, or just matrix and irc buffers\n" +
